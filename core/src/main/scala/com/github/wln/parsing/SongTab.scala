@@ -53,7 +53,18 @@ object ChordQuality extends Enumeration {
   val MINOR, MAJOR, AUGMENTED, DIMINISHED = Value
 }
 object Note extends Enumeration {
-  val C, `C#`, D, `D#`, E, F, `F#`, G, `G#`, A, `A#`, B = Value
+  val C = Value("C")
+  val `C#` = Value("C#")
+  val D = Value("D")
+  val `D#` = Value("D#")
+  val E = Value("E")
+  val F = Value("F")
+  val `F#` = Value("F#")
+  val G = Value("G")
+  val `G#` = Value("G#")
+  val A = Value("A")
+  val `A#` = Value("A#")
+  val B = Value("B")
 
   implicit class NoteValue(note: Note.Value) {
     val semitonesFromC: Int = noteToSemitonesFromC(note)
