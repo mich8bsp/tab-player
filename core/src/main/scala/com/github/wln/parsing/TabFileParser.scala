@@ -6,23 +6,30 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.util.{Success, Try}
 
-class TabFileParser {
+object TabFileParser {
 
-  def parse(fileSource: Source): SongTab = {
+  def parse(fileSource: Source, onlyMetadata: Boolean = false): SongTab = {
     val lines = fileSource.getLines()
-    val builder = new TabBuilder()
+    val builder = new TabBuilder(onlyMetadata)
     lines.foreach(line => builder.addLine(line))
     val tab = builder.build
     fileSource.close()
     tab
   }
 
+  def parseFromResource(filePath: String, onlyMetadata: Boolean = false): SongTab = {
+    parse(Source.fromResource(filePath), onlyMetadata)
+  }
+
+  def parseFromFile(filePath: String, onlyMetadata: Boolean = false): SongTab = {
+    parse(Source.fromFile(URI.create(filePath)), onlyMetadata)
+  }
 
 }
 
-class TabBuilder {
+class TabBuilder(parseOnlyMetadata: Boolean) {
 
-  import TabParser._
+  import TabParserUtils._
 
   var chordsRegistry = ChordsRegistry()
   var tab: SongTab = SongTab(chordsRegistry = chordsRegistry)
@@ -33,11 +40,11 @@ class TabBuilder {
   def addLine(line: String): Unit = line match {
     case l if l.contains("[Title]") => tab = tab.copy(title = Some(l.replaceFirst("\\[Title\\]", "").trim))
     case l if l.contains("[Artist]") => tab = tab.copy(artist = Some(l.replaceFirst("\\[Artist\\]", "").trim))
-    case l if l.startsWith("[Chords]") => {
+    case l if l.startsWith("[Chords]") && !parseOnlyMetadata => {
       finalizeCurrentPart()
       processingChords = true
     }
-    case l if l.startsWith("[") => {
+    case l if l.startsWith("[") && !parseOnlyMetadata => {
       finalizeCurrentPart()
       val partName = l.substring(1, l.indexOf("]"))
       currentSongPart = Some(SongPart(partName = partName))
@@ -78,7 +85,7 @@ class TabBuilder {
 
 }
 
-object TabParser {
+object TabParserUtils {
   import scala.language.postfixOps
 
   def parseLine(line: String): ITabLine = {

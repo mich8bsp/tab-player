@@ -2,21 +2,19 @@ package com.github.wln.screens
 
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.scenes.scene2d.ui.{Button, Label, TextButton}
+import com.badlogic.gdx.scenes.scene2d.{InputEvent, InputListener, Stage}
+import com.github.wln.TabsProvider
 import com.github.wln.common.GameSkin
-import com.github.wln.parsing.{ChordsLine, EmptyLine, LyricsLine, TabFileParser}
+import com.github.wln.parsing._
 
-import scala.io.Source
+class SongTabScreen(screenManager: IScreenManager, stage: Option[Stage], songDescription: SongBriefDescription) extends ScreenAdapter {
+  val tab: SongTab = TabsProvider.getTabByDescription(songDescription)
+  val font: BitmapFont = GameSkin.getFont(15)
+  private val height: Int = screenManager.getHeight
 
-class SongTabScreen(sizeProvider: IScreenManager, stage: Option[Stage], tabName: String) extends ScreenAdapter {
-  val parser = new TabFileParser()
-  val tab = parser.parse(Source.fromResource(s"$tabName.tabs"))
-  val batch = new SpriteBatch()
-  val font = GameSkin.getFont(15)
-  private val width: Int = sizeProvider.getWidth
-  private val height: Int = sizeProvider.getHeight
+  private val backButton = createBackButton
 
   private def createText(text: String, lineNumber: Int, lineWidth: Int = 20, horizontalOffset: Int = 10): Unit = {
     val label: Label = new Label(text, new Label.LabelStyle(font, Color.WHITE))
@@ -25,10 +23,26 @@ class SongTabScreen(sizeProvider: IScreenManager, stage: Option[Stage], tabName:
     stage.foreach(_.addActor(label))
   }
 
+  private def createBackButton: Button = {
+    val backButton = new TextButton("Back", GameSkin.getSkin)
+    backButton.setPosition(20, 20)
+    backButton.addListener(new InputListener() {
+      override def touchUp(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Unit = {
+      }
+
+      override def touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean = {
+        screenManager.switchScreen(new SongSelectionScreen(screenManager, stage))
+        true
+      }
+    })
+    backButton
+  }
+
 
   override def show(): Unit = {
     println(tab)
 
+    stage.foreach(_.addActor(backButton))
     var linesCount = 0
     createText(Seq(tab.artist, tab.title).flatten.mkString(" - "), linesCount)
     linesCount += 2

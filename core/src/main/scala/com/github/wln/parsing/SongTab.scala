@@ -106,3 +106,9 @@ object Note extends Enumeration {
   }
 
 }
+
+case class SongBriefDescription(
+                                 title: Option[String],
+                                 artist: Option[String],
+                                 fileName: String
+                               )
