@@ -1,16 +1,24 @@
 package com.github.wln
 
-import com.badlogic.gdx.ApplicationAdapter
-import com.github.wln.parsing.TabFileParser
+import com.badlogic.gdx.Screen
+import com.github.wln.screens.{IScreenManager, SongSelectionScreen}
 
-import scala.io.Source
+class TabPlayerApp(val width: Int, val height: Int) extends GameApp with IScreenManager {
 
-class TabPlayerApp extends ApplicationAdapter{
-
-  override def create(): Unit = {
-    val parser = new TabFileParser()
-    val tab = parser.parse(Source.fromResource("take_on_me.tabs"))
-    println(tab)
+  override def initialize(): Unit = {
+    setScreen(new SongSelectionScreen(this, this.mainStage))
   }
 
+  override def update(dt: Float): Unit = {
+
+  }
+
+  override def switchScreen(screen: Screen): Unit = {
+    clear()
+    setScreen(screen)
+  }
+
+  override def getHeight: Int = height
+
+  override def getWidth: Int = width
 }
